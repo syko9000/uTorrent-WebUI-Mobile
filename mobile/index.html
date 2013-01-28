@@ -1,0 +1,86 @@
+<!DOCTYPE html> 
+<html> 
+<head> 
+    <title>uTorrent</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css" />
+    <link rel="stylesheet" type="text/css" href="default.css" />
+    <link rel="apple-touch-icon" href="/gui/iphone/apple-touch-icon.png" />
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js"></script>
+    <script type="text/javascript" src="jquery.progressbar.js"></script>
+    <script type="text/javascript" src="default.js"></script>
+</head>
+<body>
+
+<div data-role="page" id="main">
+
+    <div data-role="header" data-position="fixed" data-theme="b">
+        <a href="#popupAdd" data-icon="add" data-rel="popup" data-role="button" data-position-to="window" data-inline="true">Add</a>
+        <h1>μTorrent</h1>
+    </div><!-- /header -->
+
+    <div data-role="content">
+        <ul data-role="listview" id="torrents">
+            <li data-role="list-divider" role="heading" class="ui-li ui-li-divider ui-bar-d" data-fixed="true">
+                <div data-role="controlgroup" data-type="horizontal" data-mini="true" style="float: right;">
+                    <span id="upspeed" data-role="button">0 B/s</span>
+                    <span id="downspeed" data-role="button">0 B/s</span>
+                </div>
+                <div data-role="controlgroup" data-type="horizontal" data-mini="true">
+                    <span id="total" data-role="button">0</span>
+                    <span id="downloading" data-role="button">0</span>
+                    <span id="uploading" data-role="button">0</span>
+                    <span id="finished" data-role="button">0</span>
+                </div>
+            </li>
+        </ul>
+    </div><!-- /content -->
+
+    <div data-role="popup" id="popupAdd" data-theme="a" class="ui-corner-all">
+        <div style="padding:10px 20px;">
+            <h3>Add Torrent</h3>
+            <label for="un" class="ui-hidden-accessible">Torrent URL:</label>
+            <input type="text" name="url" id="addUrl" value="" placeholder="Torrent URL" data-theme="a" />
+
+            <button type="submit" id="addButton" data-theme="b">Add</button>
+        </div>
+    </div>
+
+    <div data-role="popup" id="menu" data-corners="false" data-theme="none" data-shadow="false" data-tolerance="0,0">
+        <button id="remove" data-theme="a" data-icon="delete" data-mini="true">Remove</button>
+        <button id="pause" data-theme="a" data-icon="pause" data-mini="true">Pause</button>
+        <button id="start" data-theme="a" data-icon="start" data-mini="true">Start</button>
+    </div>
+
+</div><!-- /page -->
+
+<div data-role="page" id="details" data-add-back-btn="true">
+
+    <div data-role="header" data-position="fixed" data-theme="b">
+        <h1>μTorrent</h1>
+    </div><!-- /header -->
+
+    <div data-role="content">
+        <ul data-role="listview" id="files">
+            <li data-role="list-divider" role="heading" class="ui-li ui-li-divider ui-bar-d" data-fixed="true">
+                <div data-role="controlgroup" data-type="horizontal" data-mini="true" style="float: right;">
+                    <span id="upspeed" data-role="button">0 B/s</span>
+                    <span id="downspeed" data-role="button">0 B/s</span>
+                </div>
+                <div data-role="controlgroup" data-type="horizontal" data-mini="true">
+                    <span id="total" data-role="button">0</span>
+                    <span id="downloading" data-role="button">0</span>
+                    <span id="uploading" data-role="button">0</span>
+                    <span id="finished" data-role="button">0</span>
+                </div>
+            </li>
+        </ul>
+    </div><!-- /content -->
+
+</div><!-- /page -->
+
+
+</body>
+</html>

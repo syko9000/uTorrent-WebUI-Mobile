@@ -1,0 +1,92 @@
+body {
+    -webkit-touch-callout: none !important;
+}
+.ui-mini .ui-btn-inner {
+    font-size: 12.5px;
+    padding: .35em 6px .3em;
+}
+.ui-li-divider {
+    padding: .15em 5px;
+}
+.ui-li-divider .ui-btn-inner {
+    font-size: 9px;
+}
+#files .ui-btn .ui-btn-inner {
+    padding-right: 11px;
+}
+.progress {
+    /*width: 100%;*/
+}
+.custom-progressbar {
+    border: 1px solid black;
+    height: 10px;
+    margin: 2px 0px;
+}
+.custom-progressbar-value {
+    border: 1px solid black;
+    width: 10%;
+    height: 10px;
+    float: left;
+    margin: -1px 0px 0px -1px;
+}
+.torrent a, .torrent .a {
+    white-space: normal !important;
+    font-size: .66em;
+    padding-right: 56px !important;
+}
+.torrent span.status {
+    white-space: nowrap !important;
+    display: inline-block;
+}
+.torrent .status-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    top: 4px;
+}
+.torrent span.status em {
+    color: gray;
+}
+/* -- COMPLETED -- */
+.torrent.status136 .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -113px 0px;
+}
+.torrent.status136 span.status {
+    display: none !important;
+}
+.torrent.status136 div.progress {
+    display: none !important;
+}
+/* -- DOWNLOADING -- */
+.torrent.status201 .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat 0px 0px;
+}
+/* -- UPLOADING -- */
+.torrent.status202 .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -17px 0px;
+}
+.torrent.status202 div.progress {
+    display: none !important;
+}
+.torrent.status202 div.title {
+    margin-bottom: 5px;
+}
+/* -- PAUSED -- */
+.torrent.status233 .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -49px 0px;
+}
+
+#menu-popup {
+    right: 0px !important;
+    left: auto !important;
+}
+#menu {
+    width: 200px;
+    border: 1px solid #000;
+    border-right: none;
+    background: rgba(0,0,0,.5);
+    margin: -1px 0;
+}
+#menu .ui-btn {
+    margin: 1em;
+}
