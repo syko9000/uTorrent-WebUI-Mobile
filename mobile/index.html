@@ -48,13 +48,22 @@
         </div>
     </div>
 
-    <div data-role="popup" id="menu" data-corners="false" data-theme="none" data-shadow="false" data-tolerance="0,0">
-        <button id="remove" data-theme="a" data-icon="delete" data-mini="true">Remove</button>
-        <button id="pause" data-theme="a" data-icon="pause" data-mini="true">Pause</button>
-        <button id="start" data-theme="a" data-icon="start" data-mini="true">Start</button>
+</div><!-- /page -->
+
+
+<div data-role="dialog" id="menu" data-tolerance="0,0">
+    <div data-role="header" data-theme="d">
+        <h1>Actions</h1>
     </div>
 
-</div><!-- /page -->
+    <div data-role="content" data-theme="c">
+        <button id="remove" data-theme="a" data-icon="delete">Remove</button>
+        <button id="pause" data-theme="a" data-icon="pause">Pause</button>
+        <button id="start" data-theme="a" data-icon="start">Start</button>
+        <button id="stop" data-theme="a" data-icon="stop">Stop</button>
+    </div>
+</div>
+
 
 <div data-role="page" id="details" data-add-back-btn="true">
 

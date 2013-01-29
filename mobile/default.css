@@ -18,12 +18,12 @@ body {
     /*width: 100%;*/
 }
 .custom-progressbar {
-    border: 1px solid black;
+    border: 1px solid gray;
     height: 10px;
     margin: 2px 0px;
 }
 .custom-progressbar-value {
-    border: 1px solid black;
+    border: 1px solid gray;
     width: 10%;
     height: 10px;
     float: left;
@@ -48,45 +48,42 @@ body {
     color: gray;
 }
 /* -- COMPLETED -- */
-.torrent.status136 .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -113px 0px;
+.torrent.statusFinished .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -112px 0px;
 }
-.torrent.status136 span.status {
+.torrent.statusFinished span.status {
     display: none !important;
 }
-.torrent.status136 div.progress {
+.torrent.statusFinished div.progress {
     display: none !important;
 }
 /* -- DOWNLOADING -- */
-.torrent.status201 .status-icon {
+.torrent.statusDownloading .status-icon {
     background: transparent url('/gui/iphone/tstatus.png') no-repeat 0px 0px;
 }
 /* -- UPLOADING -- */
-.torrent.status202 .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -17px 0px;
+.torrent.statusUploading .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -16px 0px;
 }
-.torrent.status202 div.progress {
+.torrent.statusUploading div.progress {
     display: none !important;
 }
-.torrent.status202 div.title {
+.torrent.statusUploading div.title {
     margin-bottom: 5px;
 }
 /* -- PAUSED -- */
-.torrent.status233 .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -49px 0px;
+.torrent.statusPaused .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -48px 0px;
+}
+/* -- STOPPED -- */
+.torrent.statusStopped .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -32px 0px;
+}
+/* -- CHECKING -- */
+.torrent.statusQueued .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -176px 0px;
 }
 
-#menu-popup {
-    right: 0px !important;
-    left: auto !important;
-}
-#menu {
-    width: 200px;
-    border: 1px solid #000;
-    border-right: none;
-    background: rgba(0,0,0,.5);
-    margin: -1px 0;
-}
-#menu .ui-btn {
+#menu .ui-content .ui-btn {
     margin: 1em;
 }

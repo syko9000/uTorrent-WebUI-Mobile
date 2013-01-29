@@ -1,25 +1,11 @@
-Storage.prototype.setObject = function(key, obj) {
-    return this.setItem(key, JSON.stringify(obj))
-}
-Storage.prototype.getObject = function(key) {
-    var obj = this.getItem(key);
-    if (!obj) return null;
-    return JSON.parse(obj)
-}
-
-function reloadToken(func) {
-    var doc = $.ajax({
-        url: '/gui/token.html'
-    }).done(function(data) {
-        func($(data).text());
-    });
-}
-
+// API
 function action(action, params, func) {
     if (!params) params = {};
     if (action)  params['action'] = action;
-    reloadToken(function (token) {
-        params['token'] = token;
+    var doc = $.ajax({
+        url: '/gui/token.html'
+    }).done(function(data) {
+        params['token'] = $(data).text();
         $.getJSON(
             '/gui/',
             params,
@@ -66,17 +52,126 @@ function setPriority(id, index, priority) {
     });
 }
 
+function loadFiles() {
+    var torrent = sessionStorage.getObject('torrent');
+
+    action('getfiles', { hash: torrent[0] }, function (data) {
+        if (!data.files) {
+            clearInterval(window.loadFilesTimer);
+            delete(window.loadFilesTimer);
+            $.mobile.back();
+        }
+        data.files[1].sort(function(a, b) {
+            return 0;
+        });
+
+        for (i in data.files[1]) {
+            var file = data.files[1][i];
+
+            var items = $('#files [torrentid=' + torrent[0] + '][fileindex=' + i + ']');
+            if (!items.length) {
+                items = buildFileItem(torrent, file, i);
+            } else {
+                items.each(function(index, item) {
+                    item.setFileData(file);
+                });
+            }
+
+            $('#files').append(items);
+
+        }
+
+        $('#files').listview('refresh');
+    });
+}
+
+function loadTorrents() {
+    action(null, { list: 1 }, function (data) {
+        var tus = 0, tds = 0, tu = 0, td = 0, tf = 0;
+
+        data.torrents.sort(function(a, b) {
+            if (a[17] > b[17] && a[17] > 0) {
+                return 1;
+            } else if (a[17] < b[17] && b[17] > 0) {
+                return -1;
+            } else {
+                return (a[1] > b[1]) ? 1 : -1;
+            }
+        });
+
+
+        var list = {};
+        for (i in data.torrents) {
+            var torrent = data.torrents[i];
+            list[torrent[0]] = true;
+
+            var status = status2readable(torrent);
+            if (status == 'Downloading') ++td;
+            if (status == 'Uploading') ++tu;
+            if (status != 'Finished') {
+                tus += torrent[8];
+                tds += torrent[9];
+            } else {
+                ++tf;
+            }
+
+            var items = $('#torrents [torrentid=' + torrent[0] + ']');
+            if (!items.length) {
+                items = buildTorrentItem(torrent);
+
+                items.on('click', function(event, ui) {
+                    var torrent = $(this).data('torrent');
+                    sessionStorage.setObject('torrent', torrent);
+                });
+            } else {
+                items.each(function(index, item) {
+                    item.setTorrentData(torrent);
+                });
+            }
+
+            $('#torrents').append(items);
+
+            items = $('#files [torrentid=' + torrent[0] + ']');
+            if (items.length) {
+                items[0].setTorrentData(torrent);
+            }
+        }
+
+        $torrents = $('#torrents');
+        if ($torrents.hasClass('ui-listview')) {
+            $torrents.listview('refresh');
+        }
+
+        $('#torrents').children().not('.ui-li-divider').each(function (i, li) {
+            var id = $(li).attr('torrentid');
+            var t = id.split('-');
+            var id = t[0];
+            if (li.nodeType != 1 || !list[id]) {
+                $(li).remove();
+            }
+        });
+
+        $('#total .ui-btn-text').html('<em>T:</em> ' + data.torrents.length);
+        $('#downloading .ui-btn-text').html('<em>D:</em> ' + td);
+        $('#uploading .ui-btn-text').html('<em>U:</em> ' + tu);
+        $('#finished .ui-btn-text').html('<em>F:</em> ' + tf);
+        $('#upspeed .ui-btn-text').html('<em>U:</em> ' + b2readable(tus) + '/s');
+        $('#downspeed .ui-btn-text').html('<em>D:</em> ' + b2readable(tds) + '/s');
+    });
+}
+
+// UI
 function buildTorrentItem(torrent) {
     var id = torrent[0];
 
-    var tdiv = $('<li torrentid="' + id + '" data-mini="true"></li>');
-    tdiv.addClass('torrent');
+    var li = $('<li torrentid="' + id + '" data-mini="true"></li>');
+    li.addClass('torrent');
 
-    link = $('<a class="a" href="#details" data-transition="slide"></a>').appendTo(tdiv);
+    link = $('<a class="a" href="#details" data-transition="slide"></a>').appendTo(li);
     $('<span class="status-icon ui-li-icon" />').appendTo(link);
     $('<div class="title" style="font-size: 1.5em; white-space: nowrap; margin-left: 13px">' + title(torrent[2]) + '</div>').appendTo(link);
 
-    var item = tdiv[0];
+    var item = li[0];
     item.progress = $("<div class=\"progress\"></div>").appendTo(link);
     item.share    = $("<span class=\"status\" />").appendTo(link).after(" ");
     item.size     = $("<span class=\"status\" />").appendTo(link).after(" ");
@@ -93,20 +188,12 @@ function buildTorrentItem(torrent) {
     item.setTorrentData = function(torrent) {
         var oldtorrent = $(this).data('torrent');
         if (oldtorrent) {
-            if (oldtorrent[1] == 201 && oldtorrent[4] == 1000) {
-                $(this).addClass("status202");
-            } else {
-                $(this).addClass("status" + oldtorrent[1]);
-            }
+            $(this).removeClass('status' + status2readable(oldtorrent));
         }
 
         $(this).data('torrent', torrent);
 
-        if (torrent[1] == 201 && torrent[4] == 1000) {
-            $(this).addClass("status202");
-        } else {
-            $(this).addClass("status" + torrent[1]);
-        }
+        $(this).addClass('status' + status2readable(torrent));
 
         this.progress.progressbar('option', 'value', torrent[4]/10);
         this.percent.text(torrent[4]/10 + '%');
@@ -129,20 +216,20 @@ function buildTorrentItem(torrent) {
 
     item.setTorrentData(torrent);
 
-    return tdiv;
+    return li;
 }
 
-function buildFileItem(torrent, file) {
+function buildFileItem(torrent, file, index) {
     var torrentid = torrent[0];
-    var fileid = file[4];
+    var fileid = index;
 
-    var tdiv = $('<li torrentid="' + torrentid + '" fileindex="' + fileid + '" data-mini="true" data-icon="false"></li>');
-    tdiv.addClass('torrent file');
+    var li = $('<li torrentid="' + torrentid + '" fileindex="' + fileid + '" data-mini="true" data-icon="false"></li>');
+    li.addClass('torrent file');
 
-    link = $('<a class="a"></a>').appendTo(tdiv);
+    link = $('<a class="a"></a>').appendTo(li);
     $('<div class="title" style="font-size: 1.25em; white-space: nowrap; ">' + title(file[0]) + '</div>').appendTo(link);
 
-    var item = tdiv[0];
+    var item = li[0];
     item.progress = $("<div class=\"progress\"></div>").appendTo(link);
     item.size     = $("<span class=\"status\" />").appendTo(link).after(" ");
     item.priority = $("<span class=\"status\" />").appendTo(link).after(" ");
@@ -162,7 +249,7 @@ function buildFileItem(torrent, file) {
 
         var p = Math.round(file[2]/file[1]*1000)/10;
 
-        this.priority.data('file', file);
+        this.priority.data('fileindex', index);
         this.priority.data('priority', file[3]);
         this.priority.data('torrent', torrent);
 
@@ -173,20 +260,30 @@ function buildFileItem(torrent, file) {
 
         this.priority.click(function (event) {
             var torrent = $(this).data('torrent');
-            var file = $(this).data('file');
+            var file = $(this).data('fileindex');
             var priority = $(this).data('priority') + 1;
 
             if (priority >= 4) priority = 0;
 
             $(this).html('<em>Priority</em>: ' + priority2readable(priority));
 
-            setPriority(torrent[0], file[4], priority);
+            setPriority(torrent[0], file, priority);
         });
     }
 
     item.setFileData(file);
 
-    return tdiv;
+    return li;
+}
+
+// Helpers
+Storage.prototype.setObject = function(key, obj) {
+    return this.setItem(key, JSON.stringify(obj))
+}
+Storage.prototype.getObject = function(key) {
+    var obj = this.getItem(key);
+    if (!obj) return null;
+    return JSON.parse(obj)
 }
 
 function b2readable(bytes) {
@@ -209,6 +306,25 @@ function priority2readable(pr) {
         case 2: return "normal";
         case 3: return "high";
         default: return "high (" + pr + ")";
+    }
+}
+
+function status2readable(torrent) {
+    var status = torrent[1];
+    switch(status) {
+        case 136:
+            if (torrent[4] == 1000) {
+                return 'Finished';
+            }
+        case 137: return 'Stopped';
+        case 200: return 'Queued';
+        case 201:
+            if (torrent[4] != 1000) {
+                return 'Downloading';
+            }
+        case 202: return 'Uploading';
+        case 233: return 'Paused';
+        default:  alert(status); return 'Unknown';
     }
 }
 
@@ -252,129 +368,18 @@ function eta(seconds) {
     }
 }
 
-function loadFiles() {
-    var torrent = sessionStorage.getObject('torrent');
-
-    action('getfiles', { hash: torrent[0] }, function (data) {
-        data.files.sort(function(a, b) {
-            return 0;
-        });
-
-        for (i in data.files[1]) {
-            var file = data.files[1][i];
-
-            var items = $('#files [torrentid=' + torrent[0] + '][fileindex=' + file[4] + ']');
-            if (!items.length) {
-                items = buildFileItem(torrent, file);
-            } else {
-                items.each(function(index, item) {
-                    item.setFileData(file);
-                });
-            }
-
-            $('#files').append(items);
-
-        }
-
-        $('#files').listview('refresh');
-    });
-}
-
-function loadTorrents() {
-    action(null, { list: 1 }, function (data) {
-        var tus = 0, tds = 0, tu = 0, td = 0, tf = 0;
-
-        data.torrents.sort(function(a, b) {
-            if (a[17] > b[17] && a[17] > 0) {
-                return 1;
-            } else if (a[17] < b[17] && b[17] > 0) {
-                return -1;
-            } else {
-                return (a[1] > b[1]) ? 1 : -1;
-            }
-        });
-
-
-        var list = {};
-        for (i in data.torrents) {
-            var torrent = data.torrents[i];
-            list[torrent[0]] = true;
-            if (torrent[1] == 201 && torrent[4] == 1000) {
-                ++tu;
-            } else {
-                ++td;
-            }
-            if (torrent[1] == 136 && torrent[4] != 1000) {
-                --td;
-                torrent[1] = 137;
-            }
-            if (torrent[1] != 136) {
-                tus += torrent[8];
-                tds += torrent[9];
-            } else {
-                ++tf;
-                --td;
-            }
-
-            var items = $('#torrents [torrentid=' + torrent[0] + ']');
-            if (!items.length) {
-                items = buildTorrentItem(torrent);
-
-                items.on('click', function(event, ui) {
-                    var torrent = $(this).data('torrent');
-
-                    $('#files').children().not('.ui-li-divider').remove();
-
-                    tdiv = buildTorrentItem(torrent);
-                    tdiv.appendTo($('#files'));
-
-                    sessionStorage.setObject('torrent', torrent);
-
-                    loadFiles();
-                });
-            } else {
-                items.each(function(index, item) {
-                    item.setTorrentData(torrent);
-                });
-            }
-
-            $('#torrents').append(items);
-
-            items = $('#files [torrentid=' + torrent[0] + ']');
-            if (items.length) {
-                items[0].setTorrentData(torrent);
-            }
-        }
-
-        $('#torrents').listview('refresh');
-
-        $('#torrents').children().not('.ui-li-divider').each(function (i, tdiv) {
-            var id = $(tdiv).attr('torrentid');
-            var t = id.split('-');
-            var id = t[0];
-            if (tdiv.nodeType != 1 || !list[id]) {
-                $(tdiv).remove();
-            }
-        });
-
-        $('#total .ui-btn-text').html('<em>T:</em> ' + data.torrents.length);
-        $('#downloading .ui-btn-text').html('<em>D:</em> ' + td);
-        $('#uploading .ui-btn-text').html('<em>U:</em> ' + tu);
-        $('#finished .ui-btn-text').html('<em>F:</em> ' + tf);
-        $('#upspeed .ui-btn-text').html('<em>U:</em> ' + b2readable(tus) + '/s');
-        $('#downspeed .ui-btn-text').html('<em>D:</em> ' + b2readable(tds) + '/s');
-    });
-}
-
+// Events
 $("#main").live('pageinit', function() {
     $( "#popupAdd" ).live('popupafteropen', function(event, ui) {
         $('#addUrl').focus();
     });
+
     $('#addButton').click(function() {
         add($('#addUrl').val());
         $('#popupAdd').popup( "close" );
         $('#addUrl').val('');
     });
+
     loadTorrents();
     window.loadTorrentsTimer = setInterval(loadTorrents, 1000);
 });
@@ -384,11 +389,18 @@ $("#details").live( "pagebeforeshow", function( event, data ) {
 
     $('#files').children().not('.ui-li-divider').remove();
 
-    tdiv = buildTorrentItem(torrent);
-    tdiv.attr('data-icon', 'false');
-    tdiv.attr('data-theme', 'e');
-    $('a', tdiv).attr('href', null);
-    tdiv.appendTo($('#files'));
+    li = buildTorrentItem(torrent);
+    li.attr('data-icon', 'false');
+    li.attr('data-theme', 'e');
+    $('a', li).attr('href', null);
+    li.appendTo($('#files'));
+
+    $('#files').listview('refresh');
+
+    if (!window.loadTorrentsTimer) {
+        loadTorrents();
+        window.loadTorrentsTimer = setInterval(loadTorrents, 1000);
+    }
 
     loadFiles();
     window.loadFilesTimer = setInterval(loadFiles, 1000);
@@ -400,24 +412,13 @@ $("#torrents li").live( "taphold", function (event) {
     var torrent = $(event.currentTarget).data('torrent');
     $("#menu").data('torrent', torrent);
 
-    if (torrent[1] == 201 && torrent[4] == 1000) {
-        $('#menu').addClass("status202");
-    } else {
-        $('#menu').addClass("status" + torrent[1]);
-    }
+    $.mobile.changePage( "#menu", { transition: "slideup"} );
 
-    $("#menu").popup().popup("open", {
-        transition: "slide",
-        positionTo: "window"
-    });
 });
 
-$( "#menu" ).on({
-    popupbeforeposition: function() {
-        var h = $( window ).height();
-
-        $( "#menu" ).css( "height", h );
-    }
+$('#details').live( 'pagebeforehide',function(event, ui) {
+    clearInterval(window.loadFileTimer);
+    delete(window.loadFileTimer);
 });
 
 $("#remove").live("click", function (event, ui) {
@@ -425,7 +426,7 @@ $("#remove").live("click", function (event, ui) {
 
     remove(torrent[0]);
 
-    $('#menu').popup('close');
+    $('#menu').dialog('close');
 });
 
 $("#pause").live("click", function (event, ui) {
@@ -433,7 +434,7 @@ $("#pause").live("click", function (event, ui) {
 
     pause(torrent[0]);
 
-    $('#menu').popup('close');
+    $('#menu').dialog('close');
 });
 
 $("#stop").live("click", function (event, ui) {
@@ -441,7 +442,7 @@ $("#stop").live("click", function (event, ui) {
 
     stop(torrent[0]);
 
-    $('#menu').popup('close');
+    $('#menu').dialog('close');
 });
 
 $("#start").live("click", function (event, ui) {
@@ -449,7 +450,7 @@ $("#start").live("click", function (event, ui) {
 
     start(torrent[0]);
 
-    $('#menu').popup('close');
+    $('#menu').dialog('close');
 });
 
 
