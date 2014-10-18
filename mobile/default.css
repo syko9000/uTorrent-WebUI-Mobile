@@ -1,7 +1,7 @@
 body {
     -webkit-touch-callout: none !important;
 }
-.ui-mini .ui-btn-inner {
+.ui-li .ui-btn-inner {
     font-size: 12.5px;
     padding: .35em 6px .3em;
 }
@@ -79,7 +79,11 @@ body {
 .torrent.statusStopped .status-icon {
     background: transparent url('/gui/iphone/tstatus.png') no-repeat -32px 0px;
 }
-/* -- CHECKING -- */
+/* -- ERROR -- */
+.torrent.statusErrored .status-icon {
+    background: transparent url('/gui/iphone/tstatus.png') no-repeat -96px 0px;
+}
+/* -- QUEUE -- */
 .torrent.statusQueued .status-icon {
     background: transparent url('/gui/iphone/tstatus.png') no-repeat -176px 0px;
 }
@@ -87,3 +91,4 @@ body {
 #menu .ui-content .ui-btn {
     margin: 1em;
 }
+

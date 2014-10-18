@@ -1,7 +1,12 @@
 // API
+
+var cid = '';
+
 function action(action, params, func) {
     if (!params) params = {};
     if (action)  params['action'] = action;
+    params['t'] = (new Date()).getTime();
+    params['cid'] = cid;
     var doc = $.ajax({
         url: '/gui/token.html'
     }).done(function(data) {
@@ -10,6 +15,7 @@ function action(action, params, func) {
             '/gui/',
             params,
             function (data) {
+                cid = data.torrentc;
                 if (func) func(data);
             }
         );
@@ -86,10 +92,13 @@ function loadFiles() {
 }
 
 function loadTorrents() {
-    action(null, { list: 1 }, function (data) {
+    action(null, { list: 1, getmsg: 1 }, function (data) {
         var tus = 0, tds = 0, tu = 0, td = 0, tf = 0;
 
-        data.torrents.sort(function(a, b) {
+        if (data.torrents) data.torrentp = data.torrents;
+        var torrents = data.torrentp;
+
+        torrents.sort(function(a, b) {
             if (a[17] > b[17] && a[17] > 0) {
                 return 1;
             } else if (a[17] < b[17] && b[17] > 0) {
@@ -101,8 +110,8 @@ function loadTorrents() {
 
 
         var list = {};
-        for (i in data.torrents) {
-            var torrent = data.torrents[i];
+        for (i in torrents) {
+            var torrent = torrents[i];
             list[torrent[0]] = true;
 
             var status = status2readable(torrent);
@@ -142,16 +151,13 @@ function loadTorrents() {
             $torrents.listview('refresh');
         }
 
-        $('#torrents').children().not('.ui-li-divider').each(function (i, li) {
-            var id = $(li).attr('torrentid');
-            var t = id.split('-');
-            var id = t[0];
-            if (li.nodeType != 1 || !list[id]) {
-                $(li).remove();
-            }
-        });
+        for (i in data.torrentm) {
+            var torrent = data.torrentm[i];
 
-        $('#total .ui-btn-text').html('<em>T:</em> ' + data.torrents.length);
+            $('#torrents [torrentid=' + torrent[0] + ']').remove();
+        }
+
+        $('#total .ui-btn-text').html('<em>T:</em> ' + torrents.length);
         $('#downloading .ui-btn-text').html('<em>D:</em> ' + td);
         $('#uploading .ui-btn-text').html('<em>U:</em> ' + tu);
         $('#finished .ui-btn-text').html('<em>F:</em> ' + tf);
@@ -317,6 +323,8 @@ function status2readable(torrent) {
                 return 'Finished';
             }
         case 137: return 'Stopped';
+        case 152: return 'Errored';
+        case 198: return ‘Checking’;
         case 200: return 'Queued';
         case 201:
             if (torrent[4] != 1000) {
@@ -417,8 +425,8 @@ $("#torrents li").live( "taphold", function (event) {
 });
 
 $('#details').live( 'pagebeforehide',function(event, ui) {
-    clearInterval(window.loadFileTimer);
-    delete(window.loadFileTimer);
+    clearInterval(window.loadFilesTimer);
+    delete(window.loadFilesTimer);
 });
 
 $("#remove").live("click", function (event, ui) {
@@ -453,4 +461,11 @@ $("#start").live("click", function (event, ui) {
     $('#menu').dialog('close');
 });
 
+function killTimers() {
+    clearInterval(window.loadTorrentsTimer);
+    clearInterval(window.loadFilesTimer);
+
+    delete(window.loadTorrentsTimer);
+    delete(window.loadFilesTimer);
+}
 
