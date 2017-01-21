@@ -324,7 +324,7 @@ function status2readable(torrent) {
             }
         case 137: return 'Stopped';
         case 152: return 'Errored';
-        case 198: return ‘Checking’;
+        case 198: return 'Checking';
         case 200: return 'Queued';
         case 201:
             if (torrent[4] != 1000) {
