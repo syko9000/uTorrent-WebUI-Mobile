@@ -49,7 +49,7 @@ body {
 }
 /* -- COMPLETED -- */
 .torrent.statusFinished .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -112px 0px;
+    background: transparent url('tstatus.png') no-repeat -112px 0px;
 }
 .torrent.statusFinished span.status {
     display: none !important;
@@ -59,11 +59,11 @@ body {
 }
 /* -- DOWNLOADING -- */
 .torrent.statusDownloading .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat 0px 0px;
+    background: transparent url('tstatus.png') no-repeat 0px 0px;
 }
 /* -- UPLOADING -- */
 .torrent.statusUploading .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -16px 0px;
+    background: transparent url('tstatus.png') no-repeat -16px 0px;
 }
 .torrent.statusUploading div.progress {
     display: none !important;
@@ -73,19 +73,19 @@ body {
 }
 /* -- PAUSED -- */
 .torrent.statusPaused .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -48px 0px;
+    background: transparent url('tstatus.png') no-repeat -48px 0px;
 }
 /* -- STOPPED -- */
 .torrent.statusStopped .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -32px 0px;
+    background: transparent url('tstatus.png') no-repeat -32px 0px;
 }
 /* -- ERROR -- */
 .torrent.statusErrored .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -96px 0px;
+    background: transparent url('tstatus.png') no-repeat -96px 0px;
 }
 /* -- QUEUE -- */
 .torrent.statusQueued .status-icon {
-    background: transparent url('/gui/iphone/tstatus.png') no-repeat -176px 0px;
+    background: transparent url('tstatus.png') no-repeat -176px 0px;
 }
 
 #menu .ui-content .ui-btn {
